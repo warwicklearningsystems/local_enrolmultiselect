@@ -183,4 +183,45 @@ trait instance{
 
         return json_encode( $configMap );
     }
+
+    /**
+     *
+     * @param string $search
+     */
+    public function presentStoredValues( $search ){
+
+        $searchObject = new search( $search , $this->propertyFromConfigToDisplay, $this->searchanywhere );
+        $configMap = self::extractFlatConfig( $this->enrolInstance, $search ? $searchObject : null, $this->field);
+
+        if(!$configMap)
+            return array();
+
+        $results = array(); // The results array we are building up.
+        foreach ($configMap as $key=>$config) {
+
+            $group = $this->getGroupName( $config );
+            $config->id = $config->{$this->propertyFromConfigToDisplay};
+            $results[ $group ][] = $config ;
+        }
+
+        return $results;
+    }
+
+    /**
+     *
+     * @global type $DB
+     * @param type $search
+     * @return type
+     */
+    public function presentPotentialValues( $search ){
+
+        global $DB;
+
+        $searchObject = new search( $search, $this->propertyFromConfigToDisplay, $this->searchanywhere );
+        $availableDesignations = parent::find_users( $search );
+
+        $results = $this->filterStoredValues( $availableDesignations, $searchObject, $this->field );
+
+        return is_array( $results ) ? $results : $availableDesignations;
+    }
 }

@@ -4,7 +4,6 @@ namespace local_enrolmultiselect\type\available;
 use \local_enrolmultiselect\type\settings\designation as settingsdesignation;
 use \local_enrolmultiselect\config;
 use \local_enrolmultiselect\search;
-use \local_enrolmultiselect\type\basedesignation;
 use \local_enrolmultiselect\traits\instance;
 
 class potential_designation extends settingsdesignation{
@@ -31,18 +30,9 @@ class potential_designation extends settingsdesignation{
     
     /**
      * 
-     * @global type $DB
      * @param string $search
-     * @return type
      */
-    public function find_users($search) {
-        global $DB;
-        
-        $searchObject = new search( $search, $this->propertyFromConfigToDisplay, $this->searchanywhere );
-        $availableDesignations = parent::find_users( $search );
-
-        $results = $this->filterStoredValues( $availableDesignations, $searchObject, $this->field );
-
-        return is_array( $results ) ? $results : $availableDesignations;
+    public function find_users( $search ) {
+        return $this->presentPotentialValues( $search );
     }
 }

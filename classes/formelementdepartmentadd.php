@@ -1,18 +1,18 @@
 <?php
-use local_enrolmultiselect\type\department;
+use local_enrolmultiselect\type\basedepartment;
 
 class local_enrolmultiselect_formelementdepartmentadd extends local_enrolmultiselect_element {
 
     /**
      *
-     * @var department
+     * @var basedepartment
      */
     private $department;    
     
-    public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, department $department ) {
+    public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedepartment $department ) {
         
         $this->department = $department;
-        parent::__construct( $department->name, $elementLabel, $attributes, $this->department );
+        parent::__construct( $this->department->name, $elementLabel, $attributes );
     }
 
     public function toHtml()
@@ -25,7 +25,7 @@ class local_enrolmultiselect_formelementdepartmentadd extends local_enrolmultise
         $rightArrow = $OUTPUT->rarrow();
         $addText = get_string('add');
         $removeText = get_string('remove');
-        $label = get_string('alloweddepartments', $this->department->plugin);
+        $label = get_string('alloweddepartments', 'local_enrolmultiselect');
 
 $html = <<<__HTML__
 <table class="generaltable generalbox groupmanagementtable boxaligncenter" summary="">
