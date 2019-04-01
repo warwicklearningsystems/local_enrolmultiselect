@@ -8,7 +8,7 @@
     $confirmadd = optional_param('confirmadd', 0, PARAM_INT);
     $confirmdel = optional_param('confirmdel', 0, PARAM_INT);
 
-    $PAGE->set_url('/local/enrolmultiselect/departments.php');
+    $PAGE->set_url('/local/enrolmultiselect/department.php');
 
     $pluginName = $_GET['plugin_name']; //validation required, this is an important parameter and must be set when url to this location is defined
 

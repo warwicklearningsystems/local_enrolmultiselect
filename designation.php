@@ -1,6 +1,6 @@
 <?php
 
-    require_once('/var/www/moodle/config.php');
+    require_once(__DIR__ . '/../../config.php');
     require_once($CFG->libdir.'/adminlib.php');
 
     use \local_enrolmultiselect\type\settings\designation;
@@ -9,7 +9,7 @@
     $confirmadd = optional_param('confirmadd', 0, PARAM_INT);
     $confirmdel = optional_param('confirmdel', 0, PARAM_INT);
 
-    $PAGE->set_url('/enrol/warwickauto/designations.php');
+    $PAGE->set_url('/local/enrolmultiselect/designation.php');
 
     $pluginName = $_GET['plugin_name']; //validation required, this is an important parameter and must be set when url to this location is defined
 
