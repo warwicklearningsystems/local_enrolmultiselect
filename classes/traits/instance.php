@@ -171,7 +171,7 @@ trait instance{
      * @param array $values
      * @return string
      */
-    private function buildConfigValues( $values ){
+    public function buildConfigValues( $values ){
         
         $configMap = [];
         foreach( $values as $value ){
@@ -223,5 +223,22 @@ trait instance{
         $results = $this->filterStoredValues( $availableDesignations, $searchObject, $this->field );
 
         return is_array( $results ) ? $results : $availableDesignations;
+    }
+
+    /**
+     *
+     * @global type $USER
+     * @return boolean
+     */
+    public function userAllowed(){
+        global $USER;
+
+        if( self::isValueSet( $this->enrolInstance, $this->field ) ){
+            if( !self::hasValue( $this->enrolInstance, $USER->{$this->propertyFromConfigToDisplay}, $this->field, $this->propertyFromConfigToDisplay ) ){
+                return false;
+            }
+        }
+
+        return true;
     }
 }
