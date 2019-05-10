@@ -30,30 +30,21 @@ class local_enrolmultiselect_formelementdesignationadd extends local_enrolmultis
         global $OUTPUT;
 
         $allowedDesignations = $this->designation->display(true);
-        
-        $leftArrow = $OUTPUT->larrow();
-        $rightArrow = $OUTPUT->rarrow();
-        $addText = get_string('add');
-        $removeText = get_string('remove');
         $label = get_string('alloweddesignations', 'local_enrolmultiselect');
+        $toggleButtons = $this->designation->renderToggleButtons( $this->designation->name, true );
 
 $html = <<<__HTML__
 <table class="generaltable generalbox groupmanagementtable boxaligncenter" summary="">
     <tr>
-      <td id='existingcell'>
-          <p>
-            <label for="removeselect">$label</label>
-          </p>
-          $allowedDesignations
-          </td>
-      <td id="buttonscell">
-        <p class="arrow_button">
-            <input name="designations_add_button" id="designations_add_button" type="submit" value="$leftArrow&nbsp;$addText"
-                   title="$addText" class="btn btn-secondary"/><br />
-            <input name="designations_remove_button" id="designations_remove_button" type="submit" value="$rightArrow&nbsp;$removeText"
-                   title="$removeText" class="btn btn-secondary"/><br />
-        </p>
-      </td>
+        <td id='existingcell'>
+            <p>
+                <label class="multiselect-label" for="removeselect">$label</label>
+            </p>
+            $allowedDesignations
+        </td>
+        <td id="buttonscell">
+            $toggleButtons
+        </td>
 __HTML__;
 
         return $html;

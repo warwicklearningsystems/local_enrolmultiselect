@@ -17,3 +17,4 @@ $string['departments'] = 'Departments';
 $string['alloweddepartments'] = 'Allowed Departments';
 $string['availabledepartments'] = 'Available Departments';
 $string['invaliddepartment'] = 'Invalid Department';
+$string['nomatchingusers'] = 'No {$a->type} match \'{$a->search}\'';

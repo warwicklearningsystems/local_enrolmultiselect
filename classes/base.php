@@ -71,19 +71,26 @@ abstract class base{
     /** @var array JavaScript YUI3 Module definition */
     protected static $jsmodule = array(
                 'name' => 'user_selector',
-                'fullpath' => '/user/selector/module.js',
+                'fullpath' => '/local/enrolmultiselect/module.js',
                 'requires'  => array('node', 'event-custom', 'datasource', 'json', 'moodle-core-notification'),
                 'strings' => array(
                     array('previouslyselectedusers', 'moodle', '%%SEARCHTERM%%'),
-                    array('nomatchingusers', 'moodle', '%%SEARCHTERM%%'),
+                    array('nomatchingusers', 'local_enrolmultiselect', ['type' => '%%TYPE%%','search' => '%%SEARCHTERM%%']),
                     array('none', 'moodle')
                 ));
+    
+    protected static $jsToggleModule = array(
+        'name' => 'selector_toggle',
+        'fullpath' => '/local/enrolmultiselect/toggle.js',
+        'requires'  => array('node', 'event-custom', 'datasource', 'json', 'moodle-core-notification'),
+    );
 
     /** @var int this is used to define maximum number of users visible in list */
     public $maxusersperpage = 100;
 
     /** @var boolean Whether to override fullname() */
     public $viewfullnames = false;
+    public $hash;
 
     /**
      * 
@@ -256,7 +263,7 @@ abstract class base{
                 get_string('userselectorsearchanywhere'));
             $output .= print_collapsible_region_end(true);
 
-            $PAGE->requires->js_init_call('M.core_user.init_user_selector_options_tracker', array(), false, self::$jsmodule);
+            $PAGE->requires->js_init_call('M.local_enrolmultiselect.init_user_selector_options_tracker', array(), false, self::$jsmodule);
             base::$searchoptionsoutput = true;
         }
         $output .= "</div>\n</div>\n\n";
@@ -270,6 +277,70 @@ abstract class base{
         } else {
             echo $output;
         }
+    }
+
+    /**
+     * 
+     * @global type $OUTPUT
+     * @global \local_enrolmultiselect\type $PAGE
+     * @param type $toggleName
+     * @param type $return
+     * @return type
+     */
+    public function renderToggleButtons($toggleName, $return = false){
+        global $OUTPUT, $PAGE;
+        
+        $addTitle    = get_string('add');
+        $leftArrow   = $OUTPUT->larrow().'&nbsp;'.$addTitle;
+        $removeTitle = get_string('remove');
+        $rightArrow  = $removeTitle.'&nbsp;'.$OUTPUT->rarrow();
+        $toggleId = $toggleName.'_'.uniqid();
+        $selectorNameId = $toggleId.'_add';
+        $potentialSelectorNameId = $toggleId.'_remove';
+
+$html = <<<___HTML___
+<div id="$toggleId">
+    <p class="arrow_button">
+        <input name="add" id="$selectorNameId" type="submit" value="$leftArrow" title="$addTitle" class="btn btn-secondary"/><br/>
+        <input name="remove" id="$potentialSelectorNameId" type="submit" value="$rightArrow" title="$removeTitle" class="btn btn-secondary"/><br/>
+    </p>
+</div>
+___HTML___;
+
+        $this->initialiseToggleJs($toggleId);
+
+        if ($return) {
+            return $html;
+        } else {
+            echo $html;
+        }
+    }
+    
+    
+        
+    /**
+     * 
+     * @global \local_enrolmultiselect\type $PAGE
+     * @param type $selectorName
+     * @param type $potentialSelectorName
+     * @return type
+     */
+    protected function initialiseToggleJs($toggleId){
+        global $PAGE;
+
+        // Put the options into the session, to allow search.php to respond to the ajax requests.
+        $options = $this->get_options();
+        $hash = md5(serialize($options));
+        $this->setHash($hash);
+        //$USER->userselectors[$hash] = $options;
+        
+        $PAGE->requires->js_init_call(
+            'M.local_enrolmultiselect.init_selector_toggle',
+            array($toggleId, $hash),
+            true,
+            self::$jsToggleModule
+        );
+        
     }
 
     /**
@@ -600,7 +671,7 @@ abstract class base{
         $select = false;
         if (empty($groupedusers)) {
             if (!empty($search)) {
-                $groupedusers = array(get_string('nomatchingusers', '', $search) => array());
+                $groupedusers = array(get_string('nomatchingusers', 'local_enrolmultiselect', ['type' => 'fff', 'search' => $search]) => array());
             } else {
                 $groupedusers = array(get_string('none') => array());
             }
@@ -638,7 +709,7 @@ abstract class base{
      */
     protected function output_optgroup($groupname, $users, $select) {
         if (!empty($users)) {
-            $output = '  <optgroup label="' . htmlspecialchars($groupname) . ' (' . count($users) . ')">' . "\n";
+            $output = '  <optgroup data-groupname="'. htmlspecialchars($groupname) .'" label="' . htmlspecialchars($groupname) . ' (' . count($users) . ')">' . "\n";
             foreach ($users as $user) {
                 $attributes = '';
                 if (!empty($user->disabled)) {
@@ -656,7 +727,7 @@ abstract class base{
                 }
             }
         } else {
-            $output = '  <optgroup label="' . htmlspecialchars($groupname) . '">' . "\n";
+            $output = '  <optgroup data-groupname="'. htmlspecialchars($groupname) .'" label="' . htmlspecialchars($groupname) . '">' . "\n";
             $output .= '    <option disabled="disabled">&nbsp;</option>' . "\n";
         }
         $output .= "  </optgroup>\n";
@@ -752,13 +823,29 @@ abstract class base{
         $USER->userselectors[$hash] = $options;
 
         // Initialise the selector.
-        $PAGE->requires->js_init_call(
+        /*$PAGE->requires->js_init_call(
             'M.core_user.init_user_selector',
             array($this->name, $hash, $this->extrafields, $search),
             false,
             self::$jsmodule
+        );*/
+        
+        $PAGE->requires->js_init_call(
+            'M.local_enrolmultiselect.init_user_selector',
+            array($this->name, $hash, $this->extrafields, $search),
+            false,
+            self::$jsmodule
         );
+        
         return $output;
+    }
+    
+    public function setHash($hash){
+        $this->hash = $hash;
+    }
+    
+    public function getHash(){
+        return $this->hash;
     }
     
     /**
@@ -806,11 +893,11 @@ abstract class base{
         if( empty( $values ) )
             return false;
 
-        $currentValues = $this->config->getFlatConfigByProperty() ? $this->config->getFlatConfigByProperty() : [];
+        /*$currentValues = $this->config->getFlatConfigByProperty() ? $this->config->getFlatConfigByProperty() : [];
         $newValues = array_diff( $values, $currentValues );
-        $valuesToAdd = array_merge( $currentValues, $newValues );
+        $valuesToAdd = array_merge( $currentValues, $newValues );*/
 
-        return $this->config->setConfig( $valuesToAdd );
+        return $this->config->setConfig( $values );
     }
     
     /**
@@ -826,5 +913,13 @@ abstract class base{
         $newValues = array_diff( $currentValues, $values );
         
         return $this->config->setConfig( $newValues );
+    }
+
+    public function removeConfig(){
+        return $this->config->removeConfig();
+    }
+    
+    public static function switchOffSearchOptionsOutput(){
+        self::$searchoptionsoutput = true;
     }
 }

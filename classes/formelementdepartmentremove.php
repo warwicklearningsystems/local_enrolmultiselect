@@ -33,7 +33,7 @@ class local_enrolmultiselect_formelementdepartmentremove extends local_enrolmult
 $html = <<<__HTML__
     <td id="potentialcell">
         <p>
-          <label for="addselect">$label</label>
+          <label class="multiselect-label" for="addselect">$label</label>
         </p>
         $availableDesignations
     </td>

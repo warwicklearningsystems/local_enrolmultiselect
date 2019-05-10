@@ -2,8 +2,12 @@
 
 namespace local_enrolmultiselect;
 
+use \local_enrolmultiselect\traits\config as configtrait;
+
 class config{
     
+    use configtrait;
+
     /**
      *
      * @var string 
@@ -33,45 +37,74 @@ class config{
         $this->name = $name;
         $this->property = $property;
     }
-    
+
     /**
      * 
-     * @param search $search
-     * @return type
+     * @param \local_enrolmultiselect\search $search
+     * @param type $toggledItemsToInclude
+     * @param type $toggledItemsToExclude
+     * @return boolean
      */
-    public function getConfig( search $search = null ){
+    public function getConfig( search $search = null, $toggledItemsToInclude = array(), $toggledItemsToExclude = array() ){
         $configValue = get_config( $this->pluginName, $this->name );
-        if(!$configValue)
-            return false;
-        $configMap = utils::arrayToObject( utils::JsonToArray( $configValue ) );
         
-        if( $search ){
+        return self::processConfig( $configValue, $this->property, $search, $toggledItemsToInclude, $toggledItemsToExclude );
+        /*if(!$configValue)
+            return false;
+
+        $configArrayMap = utils::JsonToArray( $configValue );
+
+        //temporarily bind items to the config
+        if( $toggledItemsToInclude ){
+            $valuesToBindToConfig = $this->buildConfigValues( $toggledItemsToInclude );
+            
+            //filter stored config to avoid duplicates
+            $configArrayMap = array_filter( $configArrayMap, function ($valueMap) use( $toggledItemsToInclude ){
+                    return !in_array( $valueMap[ $this->property ], $toggledItemsToInclude );
+                } 
+            );
+
+            $configArrayMap = array_merge( $configArrayMap, $valuesToBindToConfig );
+        }
+        
+        $configMap = utils::arrayToObject( $configArrayMap );
+        
+        if( $search || $toggledItemsToExclude ){
             $configArray = [];
             
             foreach( $configMap as $key=>$config){
-                if( $search->getSearchAnyWhere() ){
-                    if( !utils::strContains( $search->getStringToFind(), $config->{$search->getField()} ) ){
-                        unset( $configMap->$key );
-                    }
-                }else{
-                    if( !utils::strStartsWith( $search->getStringToFind(), $config->{$search->getField()} ) ){
-                        unset( $configMap->$key );
+
+                if( $toggledItemsToExclude && in_array( $config->{$this->property}, $toggledItemsToExclude ) ){
+                    unset( $configMap->$key );
+                }
+
+                if( $search ){
+                    if( $search->getSearchAnyWhere() ){
+
+                        if( !utils::strContains( $search->getStringToFind(), $config->{$search->getField()} ) ){
+                            unset( $configMap->$key );
+                        }
+                    }else{
+                        if( !utils::strStartsWith( $search->getStringToFind(), $config->{$search->getField()} ) ){
+                            unset( $configMap->$key );
+                        }
                     }
                 }
-                
             }
         }
         
-        return $configMap;
+        return $configMap;*/
     }
     
     /**
      * 
-     * @param string $property
-     * @return array
+     * @param type $property
+     * @param type $forQuery
+     * @param type $toggledItemsToInclude
+     * @return boolean|string
      */
-    public function getFlatConfigByProperty($property = null, $forQuery = false){
-        $configMap = $this->getConfig();
+    public function getFlatConfigByProperty($property = null, $forQuery = false, $toggledItemsToInclude = array()){
+        $configMap = $this->getConfig( null, $toggledItemsToInclude );
         
         if(!$configMap)
             return false;
@@ -86,6 +119,29 @@ class config{
         
         return $results;
     }
+
+    /**
+     * 
+     * @param array $values
+     * @return array
+     */
+    private function buildConfigValues( array $values ){
+
+        /*if( !$values )
+            return false;
+
+        $configMap = [];
+
+        foreach( $values as $value ){
+            $configMap[] = [
+                'id' => $value,
+                $this->property => $value 
+            ];
+        }
+
+        return $configMap;*/
+        return self::constructConfigValues($this->property, $values);
+    }
     
     /**
      * 
@@ -94,18 +150,15 @@ class config{
      */
     public function setConfig( array $values ){
 
-        if( !$values )
+        $configMap = $this->buildConfigValues( $values );
+        
+        if( !$configMap )
             return false;
-        
-        $configMap = [];
-        
-        foreach( $values as $value ){
-            $configMap[] = [
-                'id' => $value,
-                $this->property => $value 
-            ];
-        }
 
         return set_config( $this->name, json_encode( $configMap ), $this->pluginName );
+    }
+    
+    public function removeConfig(){
+        return set_config( $this->name, null, $this->pluginName );
     }
 }

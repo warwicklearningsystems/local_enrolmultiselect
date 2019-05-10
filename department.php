@@ -9,6 +9,7 @@
     $confirmdel = optional_param('confirmdel', 0, PARAM_INT);
 
     $PAGE->set_url('/local/enrolmultiselect/department.php');
+    $PAGE->requires->jquery();
 
     $pluginName = $_GET['plugin_name']; //validation required, this is an important parameter and must be set when url to this location is defined
 
@@ -26,31 +27,21 @@
     $departmentCurrentSelector = new department("s_{$pluginName}_department_add", ['plugin'=> $pluginName]);
     $departmentPotentialSelector = new potential_department("s_{$pluginName}_department_remove", ['plugin' => $pluginName]);
 
-    if (optional_param('add', false, PARAM_BOOL) && confirm_sesskey()) {
-        $departmentsToAssign = $departmentPotentialSelector->get_selected_users();
+    if ( !empty( $_POST ) && confirm_sesskey()) {
+        $departmentsToAssign = $departmentCurrentSelector->get_selected_users();
 
         if ( !empty( $departmentsToAssign ) ) {
             $departmentCurrentSelector->addToConfig( $departmentsToAssign );
 
             $departmentPotentialSelector->invalidate_selected_users();
             $departmentCurrentSelector->invalidate_selected_users();
+        }else{
+            $departmentCurrentSelector->removeConfig();
         }
     }
-    
-    if (optional_param('remove', false, PARAM_BOOL) && confirm_sesskey()) {
-        $departmentsToRemove = $departmentCurrentSelector->get_selected_users();
-
-        if ( !empty( $departmentsToRemove ) ) {
-            $departmentCurrentSelector->removeFromConfig( $departmentsToRemove );
-
-            $departmentPotentialSelector->invalidate_selected_users();
-            $departmentCurrentSelector->invalidate_selected_users();
-        }
-    }
-
 ?>
 
-<form action="<?php echo $warwickAutoUrl ?>" method="post">
+<form id="<?php echo "s_{$pluginName}_department_add_form" ?>" action="<?php echo $warwickAutoUrl ?>" method="post">
     <div>
         <input type="hidden" name="section" value="settings_<?php echo $pluginName; ?>">
         <input type="hidden" name="action" value="save-settings">
@@ -59,29 +50,26 @@
       
         <table class="generaltable generalbox groupmanagementtable boxaligncenter" summary="">
             <tr>
-              <td id='existingcell'>
-                  <p>
-                    <label for="removeselect"><?php print_string('existingdepartments', 'local_enrolmultiselect'); ?></label>
-                  </p>
-                  <?php $departmentCurrentSelector->display(); ?>
-                  </td>
-              <td id="buttonscell">
-                <p class="arrow_button">
-                    <input name="add" id="add" type="submit" value="<?php echo $OUTPUT->larrow().'&nbsp;'.get_string('add'); ?>"
-                           title="<?php print_string('add'); ?>" class="btn btn-secondary"/><br />
-                    <input name="remove" id="remove" type="submit" value="<?php echo get_string('remove').'&nbsp;'.$OUTPUT->rarrow(); ?>"
-                           title="<?php print_string('remove'); ?>" class="btn btn-secondary"/><br />
-                </p>
-              </td>
-              <td id="potentialcell">
-                  <p>
-                    <label for="addselect"><?php print_string('departments', 'local_enrolmultiselect'); ?></label>
-                  </p>
-                  <?php $departmentPotentialSelector->display(); ?>
-              </td>
+                <td id='existingcell'>
+                    <p>
+                        <label class="multiselect-label" for="removeselect"><?php print_string('existingdepartments', 'local_enrolmultiselect'); ?></label>
+                    </p>
+                    <?php $departmentCurrentSelector->display(); ?>
+                </td>
+                <td id="buttonscell">
+                    <?php $departmentCurrentSelector->renderToggleButtons("department_toggle"); ?>
+                </td>
+                <td id="potentialcell">
+                    <p>
+                        <label class="multiselect-label" for="addselect"><?php print_string('departments', 'local_enrolmultiselect'); ?></label>
+                    </p>
+                    <?php $departmentPotentialSelector->display(); ?>
+                </td>
             </tr>
         </table>
-
+    </div>
+    <div>
+        <button type="submit" name="submitbutton" id="<?php echo "s_{$pluginName}_department_add_submit" ?>" class="btn btn-primary">Save changes</button>
     </div>
 </form>
 

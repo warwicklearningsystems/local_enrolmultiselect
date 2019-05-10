@@ -3,8 +3,11 @@ namespace local_enrolmultiselect\traits;
 
 use \local_enrolmultiselect\utils;
 use \local_enrolmultiselect\search;
+use \local_enrolmultiselect\togglestore;
+use \local_enrolmultiselect\traits\config as configtrait;
 
 trait instance{
+    use configtrait;
     
     protected $field;
 
@@ -15,33 +18,22 @@ trait instance{
      * @param type $field
      * @return boolean
      */
-    public static function extractFlatConfig( $enrolInstance, search $search = null, $field = 'customtext1' ){
+    public static function extractFlatConfig( $enrolInstance, search $search = null, $field = 'customtext1', $toggledItemsToInclude = array(), $toggledItemsToExclude = array() ){
 
-        if( is_null( $enrolInstance->{$field} ) )
+        if( is_null( $enrolInstance->{$field} ) && !$toggledItemsToInclude )
             return false;
         
-        $row = $enrolInstance->{$field};
-
-        $configMap = utils::arrayToObject( utils::JsonToArray( $row ) );
-
-        if( $search && $search->getStringToFind() ){
-            $configArray = [];
-            
-            foreach( $configMap as $key=>$config){
-                if( $search->getSearchAnyWhere() ){
-                    if( !utils::strContains( $search->getStringToFind(), $config->{$search->getField()} ) ){
-                        unset( $configMap->$key );
-                    }
-                }else{
-                    if( !utils::strStartsWith( $search->getStringToFind(), $config->{$search->getField()} ) ){
-                        unset( $configMap->$key );
-                    }
-                }
-                
-            }
+        $classVars = get_class_vars( __CLASS__ );
+        $property = $classVars[ 'propertyFromConfigToDisplay' ];
+        
+        //accomodate for cases where there's no config but items have been added in UI, allows searching of these items to work
+        if( !is_null( $enrolInstance->{$field} ) ){
+            $row = $enrolInstance->{$field};
+        }else{
+            $row = json_encode( self::constructConfigValues( $property, $toggledItemsToInclude ) );
         }
         
-        return $configMap;
+        return self::processConfig( $row, $property, $search, $toggledItemsToInclude, $toggledItemsToExclude );
     }
 
     /**
@@ -51,9 +43,9 @@ trait instance{
      * @param type $field
      * @return boolean
      */
-    protected function filterStoredValues( $availableDesignations, search $search = null, $field ){
+    protected function filterStoredValues( $availableDesignations, search $search = null, $field, $toggledItemsToInclude = array(), $toggledItemsToExclude = array()  ){
 
-        $storedDesignations = self::extractFlatConfig( $this->enrolInstance, $search, $field );
+        $storedDesignations = self::extractFlatConfig( $this->enrolInstance, $search, $field);
         
         if( !$storedDesignations )
             return false;
@@ -66,7 +58,7 @@ trait instance{
                     $availableDesignation = $avilableDesignationObject->{$this->propertyFromConfigToDisplay};
                     $storedDesignation = $storedDesignationObject->{$this->propertyFromConfigToDisplay};
                     
-                    if( $availableDesignation == $storedDesignation ){
+                    if( ( $availableDesignation == $storedDesignation ) && (!$toggledItemsToInclude || ( $toggledItemsToInclude && ( !in_array($availableDesignation, $toggledItemsToInclude) )))){
                         unset($availableDesignations[ $avilableDesignationGroupName ] [$avilableDesignationKey ]);
                         
                         if( !count($availableDesignations[ $avilableDesignationGroupName ] ) ){ //if there are not more items left in this group, remove the group
@@ -190,8 +182,18 @@ trait instance{
      */
     public function presentStoredValues( $search ){
 
+        $toogledItemsToInclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_INCLUDE_MAP_NAME
+        );
+        
+        $toggledItemsToExclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_EXCLUDE_MAP_NAME
+        );
+
         $searchObject = new search( $search , $this->propertyFromConfigToDisplay, $this->searchanywhere );
-        $configMap = self::extractFlatConfig( $this->enrolInstance, $search ? $searchObject : null, $this->field);
+        $configMap = self::extractFlatConfig( $this->enrolInstance, $search ? $searchObject : null, $this->field, $toogledItemsToInclude, $toggledItemsToExclude );
 
         if(!$configMap)
             return array();
@@ -220,7 +222,16 @@ trait instance{
         $searchObject = new search( $search, $this->propertyFromConfigToDisplay, $this->searchanywhere );
         $availableDesignations = parent::find_users( $search );
 
-        $results = $this->filterStoredValues( $availableDesignations, $searchObject, $this->field );
+        $toogledItemsToInclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_INCLUDE_MAP_NAME
+        );
+        
+        $toggledItemsToExclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_EXCLUDE_MAP_NAME
+        );
+        $results = $this->filterStoredValues( $availableDesignations, $searchObject, $this->field, $toogledItemsToInclude, $toggledItemsToExclude );
 
         return is_array( $results ) ? $results : $availableDesignations;
     }

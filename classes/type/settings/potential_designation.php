@@ -2,6 +2,7 @@
 namespace local_enrolmultiselect\type\settings;
 
 use \local_enrolmultiselect\type\basedesignation;
+use \local_enrolmultiselect\togglestore;
 
 class potential_designation extends basedesignation{
     
@@ -17,7 +18,26 @@ class potential_designation extends basedesignation{
      */
     public function find_users($search) {
         global $DB;
-        $existingDesignations = $this->config->getFlatConfigByProperty( null, true );
+
+        $toogledItemsToInclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_INCLUDE_MAP_NAME
+        );
+        
+        $toggledItemsToExclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_EXCLUDE_MAP_NAME
+        );
+
+        $existingDesignations = $this->config->getFlatConfigByProperty( null, true, $toggledItemsToExclude );
+        
+        if( $toogledItemsToInclude ){
+            $existingDesignations = array_filter( $existingDesignations, function( $val ) use ( $toogledItemsToInclude ){
+                    $val = str_replace('"', '', $val);
+                    return !in_array( $val, $toogledItemsToInclude );
+                }
+            );
+        }
         
         list($wherecondition, $params) = $this->search_sql($search, 'u');
 

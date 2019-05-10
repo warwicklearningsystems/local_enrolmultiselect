@@ -6,6 +6,7 @@ use \local_enrolmultiselect\config;
 use \local_enrolmultiselect\utils;
 use \local_enrolmultiselect\search;
 use \local_enrolmultiselect\type\basedepartment; 
+use \local_enrolmultiselect\togglestore;
 
 class department extends basedepartment{        
     /**
@@ -36,15 +37,25 @@ class department extends basedepartment{
     public function find_users($search) {
         global $DB;
 
+        $toogledItemsToInclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_INCLUDE_MAP_NAME
+        );
+        
+        $toggledItemsToExclude = togglestore::get(
+            $this->getHash(), 
+            togglestore::TOGGLE_ITEMS_TO_EXCLUDE_MAP_NAME
+        );
+
         if( !$search ){
-            $designationObjectMap = $this->config->getConfig();
+            $designationObjectMap = $this->config->getConfig( null, $toogledItemsToInclude, $toggledItemsToExclude );
 
             // No designations at all.
             if(!$designationObjectMap)
                 return array();
         }else{
             $searchObject = new search( $search, $this->propertyFromConfigToDisplay, $this->searchanywhere );
-            $designationObjectMap = $this->config->getConfig( $searchObject );
+            $designationObjectMap = $this->config->getConfig( $searchObject, $toogledItemsToInclude, $toggledItemsToExclude );
         }
 
         $results = array(); // The results array we are building up.
