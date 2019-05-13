@@ -75,7 +75,7 @@ M.local_enrolmultiselect.init_selector_toggle = function (Y, toggleId, hash) {
         },
         move_option: function (fromSelectorName, toSelectorName){
             $("#" + fromSelectorName +" option:selected").each(function(index){
-                var newOption = $(this).clone();console.log(newOption);
+                var newOption = $(this).clone();
                 var fromOptGroup = $(this).parent().clone();
                 var groupName = $(this).parent().data('groupname');
                 
