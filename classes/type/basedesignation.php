@@ -7,9 +7,9 @@ use \local_enrolmultiselect\base;
 
 abstract class basedesignation extends base{
 
-    const DEFAULT_GROUP = 'Other';
+    const DEFAULT_GROUP = 'Designations';//'Other';
     
-    const GROUPS = ['User', 'Academic', 'Partner', 'Staff'];
+    const GROUPS = [];//['User', 'Academic', 'Partner', 'Staff'];
     
     /**
      *

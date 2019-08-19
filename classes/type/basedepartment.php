@@ -7,9 +7,9 @@ use \local_enrolmultiselect\base;
 
 abstract class basedepartment extends base{
 
-    const DEFAULT_GROUP = 'Other';
+    const DEFAULT_GROUP = 'Departments';//'Other';
 
-    const GROUPS = ['Centre', 'School', 'Warwick', 'WMS', 'Studies', 'Institute', 'Office', 'Service'];
+    const GROUPS = [];//['Centre', 'School', 'Warwick', 'WMS', 'Studies', 'Institute', 'Office', 'Service'];
 
     /**
      *

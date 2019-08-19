@@ -100,6 +100,8 @@ M.local_enrolmultiselect.init_selector_toggle = function (Y, toggleId, hash) {
                 }else{
                     $('#'+fromSelectorName+' optgroup[data-groupname='+groupName+']').remove(); 
                 }
+
+                $('#'+toSelectorName+' optgroup[data-groupname='+groupName+']').sortSelect();
             });
         },
         /**
@@ -120,6 +122,29 @@ M.local_enrolmultiselect.init_selector_toggle = function (Y, toggleId, hash) {
             $("#" +this.selectorName+ " option").prop( 'selected', false );
         }
     };
+
+    /**
+    * Sort values alphabetically in select
+    * source: http://stackoverflow.com/questions/12073270/sorting-options-elements-alphabetically-using-jquery
+    */
+    $.fn.extend({
+        sortSelect() {
+            let options = this.find("option"),
+                arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+
+            arr.sort((o1, o2) => { // sort select
+                let t1 = o1.t.toLowerCase(),
+                    t2 = o2.t.toLowerCase();
+                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+
+            options.each((i, o) => {
+                o.value = arr[i].v;
+                $(o).text(arr[i].t);
+            });
+        }
+    });
+
     // Augment the selector toggle with the EventTarget class so that we can use
     // custom events
     Y.augment(selector_toggle, Y.EventTarget, null, null, {});

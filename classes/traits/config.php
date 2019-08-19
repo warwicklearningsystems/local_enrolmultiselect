@@ -36,6 +36,11 @@ trait config{
             $configArrayMap = array_merge( $configArrayMap, $valuesToBindToConfig );
         }
         
+        //sort values alphabetically
+        usort( $configArrayMap, function( $a, $b ) use ( $property ){
+            return strcasecmp( $a[ $property ], $b[ $property ] );
+        });
+        
         $configMap = utils::arrayToObject( $configArrayMap );
         
         if( $search || $toggledItemsToExclude ){
