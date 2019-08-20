@@ -67,7 +67,7 @@ class potential_department extends basedepartment{
         if($search)
             $sql.= " AND ".$wherecondition;
         
-        $designations = $DB->get_records_sql( $sql, $params );
+        $designations = $DB->get_records_sql( $sql ." ORDER BY $this->propertyFromConfigToDisplay ASC", $params );
         
         $results = array(); // The results array we are building up.
         foreach ($designations as $key=>$designation) {
