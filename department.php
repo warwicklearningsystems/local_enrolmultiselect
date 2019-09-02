@@ -40,7 +40,9 @@
         }
     }
 ?>
-
+<div class="alert alert-info">
+    <?php print_string('selectionmoveinfo', 'local_enrolmultiselect');?>
+</div>
 <form id="<?php echo "s_{$pluginName}_department_add_form" ?>" action="<?php echo $warwickAutoUrl ?>" method="post">
     <div>
         <input type="hidden" name="section" value="settings_<?php echo $pluginName; ?>">
