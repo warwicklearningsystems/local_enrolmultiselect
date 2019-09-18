@@ -16,9 +16,9 @@
 
     admin_externalpage_setup("{$pluginName}_designations");
 
-    if (!is_siteadmin()) {
+    /*if (!is_siteadmin()) {
         die;
-    }
+    }*/
 
     // Print header.
     echo $OUTPUT->header();
