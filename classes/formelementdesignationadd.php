@@ -17,8 +17,8 @@ class local_enrolmultiselect_formelementdesignationadd extends local_enrolmultis
      * @param type $options
      * @param type $attributes
      * @param designation $designation
-     */
-    public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedesignation $designation ) {
+     */ {
+    public function __construct(basedesignation $designation,$elementName=null, $elementLabel=null, $options=null, $attributes=null ) {
 
         $this->designation = $designation;
         parent::__construct($this->designation->name, $elementLabel, $attributes);

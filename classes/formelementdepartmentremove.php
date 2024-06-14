@@ -17,7 +17,8 @@ class local_enrolmultiselect_formelementdepartmentremove extends local_enrolmult
      * @param type $options
      * @param type $attributes
      */
-    public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedepartment $potentialDepartment) {
+    // public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedepartment $potentialDepartment) {
+    public function __construct(basedepartment $potentialDepartment,$elementName=null, $elementLabel=null, $options=null, $attributes=null) {
         $this->potentialDepartment = $potentialDepartment;
         parent::__construct($this->potentialDepartment->name, $elementLabel, $attributes);
         $this->setMultiple(true);

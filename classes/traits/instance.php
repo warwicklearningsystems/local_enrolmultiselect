@@ -20,9 +20,13 @@ trait instance{
      */
     public static function extractFlatConfig( $enrolInstance, search $search = null, $field = 'customtext1', $toggledItemsToInclude = array(), $toggledItemsToExclude = array() ){
 
-        if( is_null( $enrolInstance->{$field} ) && !$toggledItemsToInclude )
-            return false;
+        // if( is_null( $enrolInstance->{$field} ) && !$toggledItemsToInclude )
+        //     return false;
         
+        if (!property_exists($enrolInstance, $field) || is_null($enrolInstance->{$field}) && !$toggledItemsToInclude) {
+            return false;
+        }
+
         $classVars = get_class_vars( __CLASS__ );
         $property = $classVars[ 'propertyFromConfigToDisplay' ];
         

@@ -18,7 +18,7 @@ class local_enrolmultiselect_formelementdesignationremove extends local_enrolmul
      * @param type $attributes
      * @param potential_designation $potentialDesignation
      */
-    public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedesignation $potentialDesignation) {
+    public function __construct(basedesignation $potentialDesignation,$elementName=null, $elementLabel=null, $options=null, $attributes=null) {
         $this->potentialDesignation = $potentialDesignation;
         parent::__construct($this->potentialDesignation->name, $elementLabel, $attributes);
         $this->setMultiple(true);

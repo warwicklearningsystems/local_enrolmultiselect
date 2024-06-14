@@ -9,8 +9,9 @@ class local_enrolmultiselect_formelementdepartmentadd extends local_enrolmultise
      */
     private $department;    
     
-    public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedepartment $department ) {
-        
+    // public function __construct($elementName=null, $elementLabel=null, $options=null, $attributes=null, basedepartment $department ) {
+    public function __construct(basedepartment $department,$elementName=null, $elementLabel=null, $options=null, $attributes=null) {
+
         $this->department = $department;
         parent::__construct( $this->department->name, $elementLabel, $attributes );
     }

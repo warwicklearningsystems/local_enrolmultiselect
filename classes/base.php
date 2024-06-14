@@ -803,7 +803,12 @@ ___HTML___;
                             '" value="1"' . $checked . ' /> ' . $label .
                     "</label>
                    </div>\n";
-        user_preference_allow_ajax_update($name, PARAM_BOOL);
+        // user_preference_allow_ajax_update($name, PARAM_BOOL);
+        $output .= "<script>
+                    require(['core_user/repository'], function(repository) {
+                        repository.set_preference('$name', $checked ? 1 : 0);
+                    });
+                </script>";
         return $output;
     }
 

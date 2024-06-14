@@ -10,6 +10,7 @@ use \local_enrolmultiselect\togglestore;
 
 class designation extends basedesignation{
     
+    protected $nameInverse;
     /**
      * 
      * @global type $CFG
@@ -18,6 +19,7 @@ class designation extends basedesignation{
      */
     public function __construct($name, $options) {
         parent::__construct($name, $options);
+        $this->nameInverse = "";
     }
 
     protected function get_options() {
